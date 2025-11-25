@@ -3,7 +3,7 @@
 # Copyright (c) 2021-2025 community-scripts ORG
 # Author: DragoQC
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
-# Source: https://github.com/DragoQC/DiscoPanel-PVEHS/blob/main/discopanel-install.sh
+# Source: https://discopanel.app/
 
 # Import Functions und Setup
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
@@ -18,7 +18,6 @@ get_latest_release() {
   curl -fsSL https://api.github.com/repos/"$1"/releases/latest | grep '"tag_name":' | cut -d'"' -f4
 }
 
-# Installing Dependencies
 msg_info "Installing Dependencies"
 $STD apt-get install -y \
   ca-certificates \
@@ -28,7 +27,6 @@ $STD apt-get install -y \
   golang
 msg_ok "Installed Dependencies"
 
-# Install Docker Engine
 DOCKER_LATEST_VERSION=$(get_latest_release "moby/moby")
 msg_info "Installing Docker $DOCKER_LATEST_VERSION"
 DOCKER_CONFIG_PATH='/etc/docker/daemon.json'
@@ -38,29 +36,23 @@ $STD sh <(curl -fsSL https://get.docker.com)
 msg_ok "Installed Docker $DOCKER_LATEST_VERSION"
 
 DISCOPANEL_LATEST_VERSION=$(get_latest_release "nickheyer/discopanel")
-# Setup App
 msg_info "Installing DiscoPanel ${DISCOPANEL_LATEST_VERSION}"
-# Clone repository
 git clone https://github.com/nickheyer/discopanel.git /opt/"${APPLICATION}"
 msg_ok "Installed DiscoPanel ${DISCOPANEL_LATEST_VERSION}"
 
 msg_info "Building DiscoPanel frontend Application"
-# Build frontend
 cd /opt/"${APPLICATION}"/web/discopanel || exit
 npm install
 npm run build
 msg_ok "Builded DiscoPanel frontend Application"
 
 msg_info "Building DiscoPanel backend Application"
-# Build backend
 cd /opt/"${APPLICATION}" || exit
 go build -o discopanel cmd/discopanel/main.go
 
-# Version tracking (optional)
 echo "$DISCOPANEL_LATEST_VERSION" >/opt/"${APPLICATION}"_version.txt
 msg_ok "Builded DiscoPanel backend Application"
 
-# Creating Service
 msg_info "Creating Service"
 cat <<EOF >/etc/systemd/system/"${APPLICATION}".service
 [Unit]

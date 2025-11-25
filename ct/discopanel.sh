@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/DragoQC/ProxmoxVE/main/misc/build.func)
+#source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/DragoQC/proxmoxVE/main/misc/build.func)
 # Copyright (c) 2021-2025 community-scripts ORG
 # Author: DragoQC
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
-# Source: https://github.com/DragoQC/DiscoPanel-PVEHS/blob/main/discopanel.sh
+# Source: https://discopanel.app/
 
 APP="DiscoPanel"
-var_tags="${var_tags:-minecraft;panel}"
+var_tags="${var_tags:-gaming}"
 var_cpu="${var_cpu:-4}"
-var_ram="${var_ram:-20480}"
+var_ram="${var_ram:-8096}"
 var_disk="${var_disk:-20}"
 var_os="${var_os:-debian}"
 var_version="${var_version:-13}"
@@ -19,7 +20,6 @@ variables
 color
 catch_errors
 
-# Auto-update disabled
 function update_script() {
 	header_info
   check_container_storage
@@ -29,6 +29,49 @@ function update_script() {
     msg_error "No ${APP} Installation Found!"
     exit
   fi
+
+	LATEST=$(curl -fsSL https://api.github.com/repos/nickheyer/discopanel/releases/latest \
+		grep '"tag_name":' | cut -d'"' -f4)
+
+	CURRENT=$(cat /opt/${APP}_version.txt 2>/dev/null || echo "none")
+
+	if [[ "$LATEST" == "$CURRENT" ]]; then
+    msg_ok "${APP} is already at ${LATEST}"
+    exit
+  fi
+
+	msg_info "Updating ${APP} from ${CURRENT} → ${LATEST}"
+
+	systemctl stop "${APP}"
+
+	msg_info "Creating Backup"
+  tar -czf "/opt/${APP}_backup_$(date +%F).tar.gz" "/opt/${APP}"
+  msg_ok "Backup Created"
+
+	rm -rf /opt/${APP}
+
+	msg_info "Downloading ${APP} ${LATEST}"
+  git clone --branch "$LATEST" --depth 1 \
+      https://github.com/nickheyer/discopanel.git \
+      /opt/${APP}
+  msg_ok "Downloaded ${APP} ${LATEST}"
+
+
+	msg_info "Building frontend"
+  cd /opt/${APP}/web/discopanel || exit
+  npm install
+  npm run build
+  msg_ok "Frontend Built"
+
+	msg_info "Building backend"
+  cd /opt/${APP} || exit
+  go build -o discopanel cmd/discopanel/main.go
+  msg_ok "Backend Built"
+
+	echo "$LATEST" >/opt/${APP}_version.txt
+
+	systemctl start "${APP}"
+  msg_ok "Update Successful → now at ${LATEST}"
 }
 
 start
