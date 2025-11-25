@@ -14,6 +14,10 @@ setting_up_container
 network_check
 update_os
 
+get_latest_release() {
+  curl -fsSL https://api.github.com/repos/"$1"/releases/latest | grep '"tag_name":' | cut -d'"' -f4
+}
+
 # Installing Dependencies
 msg_info "Installing Dependencies"
 $STD apt-get install -y \
@@ -39,7 +43,7 @@ msg_info "Setup ${APPLICATION}"
 git clone https://github.com/nickheyer/discopanel /opt/"${APPLICATION}"
 
 # Build backend
-cd /opt/${APPLICATION} || exit
+cd /opt/"${APPLICATION}" || exit
 go build -o discopanel cmd/discopanel/main.go
 
 # Version tracking (optional)
