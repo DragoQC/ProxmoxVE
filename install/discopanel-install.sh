@@ -20,47 +20,30 @@ $STD apt-get install -y \
   ca-certificates \
   git \
   curl \
-  npm \
   golang
 msg_ok "Installed Dependencies"
 
 # Install Docker Engine
-msg_info "Installing Docker Engine"
-
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
-
-tee /etc/apt/sources.list.d/docker.sources >/dev/null <<EOF
-Types: deb
-URIs: https://download.docker.com/linux/debian
-Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
-Components: stable
-Signed-By: /etc/apt/keyrings/docker.asc
-EOF
-
-$STD apt-get update
-$STD apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-msg_ok "Installed Docker Engine"
+DOCKER_LATEST_VERSION=$(get_latest_release "moby/moby")
+msg_info "Installing Docker $DOCKER_LATEST_VERSION"
+DOCKER_CONFIG_PATH='/etc/docker/daemon.json'
+mkdir -p $(dirname $DOCKER_CONFIG_PATH)
+echo -e '{\n  "log-driver": "journald"\n}' >/etc/docker/daemon.json
+$STD sh <(curl -fsSL https://get.docker.com)
+msg_ok "Installed Docker $DOCKER_LATEST_VERSION"
 
 # Setup App
 msg_info "Setup ${APPLICATION}"
 
 # Clone repository
-git clone https://github.com/nickheyer/discopanel /opt/${APPLICATION}
-
-# Build frontend
-cd /opt/${APPLICATION}/web/discopanel
-npm install
-npm run build
+git clone https://github.com/nickheyer/discopanel /opt/"${APPLICATION}"
 
 # Build backend
-cd /opt/${APPLICATION}
+cd /opt/${APPLICATION} || exit
 go build -o discopanel cmd/discopanel/main.go
 
 # Version tracking (optional)
-git -C /opt/${APPLICATION} describe --tags --always >/opt/"${APPLICATION}"_version.txt
+git -C /opt/"${APPLICATION}" describe --tags --always >/opt/"${APPLICATION}"_version.txt
 
 msg_ok "Setup ${APPLICATION}"
 
@@ -68,7 +51,7 @@ msg_ok "Setup ${APPLICATION}"
 
 # Creating Service
 msg_info "Creating Service"
-cat <<EOF >/etc/systemd/system/${APPLICATION}.service
+cat <<EOF >/etc/systemd/system/"${APPLICATION}".service
 [Unit]
 Description=${APPLICATION} Service
 After=network.target
@@ -84,7 +67,7 @@ Environment=PORT=8080
 WantedBy=multi-user.target
 EOF
 
-systemctl enable -q --now ${APPLICATION}
+systemctl enable -q --now "${APPLICATION}"
 msg_ok "Created Service"
 
 motd_ssh

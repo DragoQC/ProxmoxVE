@@ -5,7 +5,7 @@ source <(curl -fsSL https://raw.githubusercontent.com/DragoQC/ProxmoxVE/main/mis
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/DragoQC/DiscoPanel-PVEHS/blob/main/discopanel.sh
 
-APP="discopanel"
+APP="DiscoPanel"
 var_tags="${var_tags:-minecraft;panel}"
 var_cpu="${var_cpu:-4}"
 var_ram="${var_ram:-20480}"
@@ -21,8 +21,14 @@ catch_errors
 
 # Auto-update disabled
 function update_script() {
-  msg_error "Auto-update is not supported for ${APP}."
-  exit
+	header_info
+  check_container_storage
+  check_container_resources
+
+	if [[ ! -d "/opt/discopanel" ]]; then
+    msg_error "No ${APP} Installation Found!"
+    exit
+  fi
 }
 
 start
