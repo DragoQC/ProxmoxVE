@@ -24,6 +24,7 @@ $STD apt-get install -y \
   ca-certificates \
   git \
   curl \
+  npm \
   golang
 msg_ok "Installed Dependencies"
 
@@ -42,8 +43,13 @@ msg_info "Setup ${APPLICATION}"
 # Clone repository
 git clone https://github.com/nickheyer/discopanel /opt/"${APPLICATION}"
 
+# Build frontend
+cd /opt/"${APPLICATION}"/web/discopanel || exit
+npm install
+npm run build
+
 # Build backend
-cd /opt/"${APPLICATION}" || exit
+cd /opt/${APPLICATION} || exit
 go build -o discopanel cmd/discopanel/main.go
 
 # Version tracking (optional)
