@@ -37,27 +37,28 @@ echo -e '{\n  "log-driver": "journald"\n}' >/etc/docker/daemon.json
 $STD sh <(curl -fsSL https://get.docker.com)
 msg_ok "Installed Docker $DOCKER_LATEST_VERSION"
 
+DISCOPANEL_LATEST_VERSION=$(get_latest_release "nickheyer/discopanel")
 # Setup App
-msg_info "Setup ${APPLICATION}"
-
+msg_info "Installing DiscoPanel ${DISCOPANEL_LATEST_VERSION}"
 # Clone repository
-git clone https://github.com/nickheyer/discopanel /opt/"${APPLICATION}"
+git clone --branch "$DISCOPANEL_LATEST_VERSION" --depth 1 https://github.com/nickheyer/discopanel.git /opt/"${APPLICATION}"
+msg_ok "Cloning Repository"
 
+msg_info "Building DiscoPanel frontend Application"
 # Build frontend
 cd /opt/"${APPLICATION}"/web/discopanel || exit
 npm install
 npm run build
+msg_ok "Building DiscoPanel frontend Application"
 
+msg_info "Building DiscoPanel backend Application"
 # Build backend
-cd /opt/${APPLICATION} || exit
+cd /opt/"${APPLICATION}" || exit
 go build -o discopanel cmd/discopanel/main.go
 
 # Version tracking (optional)
-git -C /opt/"${APPLICATION}" describe --tags --always >/opt/"${APPLICATION}"_version.txt
-
-msg_ok "Setup ${APPLICATION}"
-
-
+echo "$DISCOPANEL_LATEST_VERSION" >/opt/"${APPLICATION}"_version.txt
+msg_ok "Building DiscoPanel backend Application"
 
 # Creating Service
 msg_info "Creating Service"
