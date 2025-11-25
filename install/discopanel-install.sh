@@ -41,7 +41,7 @@ DISCOPANEL_LATEST_VERSION=$(get_latest_release "nickheyer/discopanel")
 # Setup App
 msg_info "Installing DiscoPanel ${DISCOPANEL_LATEST_VERSION}"
 # Clone repository
-git clone --branch "$DISCOPANEL_LATEST_VERSION" --depth 1 https://github.com/nickheyer/discopanel.git /opt/"${APPLICATION}"
+git clone https://github.com/nickheyer/discopanel.git /opt/"${APPLICATION}"
 msg_ok "Cloning Repository"
 
 msg_info "Building DiscoPanel frontend Application"
