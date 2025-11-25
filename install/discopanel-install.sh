@@ -42,14 +42,14 @@ DISCOPANEL_LATEST_VERSION=$(get_latest_release "nickheyer/discopanel")
 msg_info "Installing DiscoPanel ${DISCOPANEL_LATEST_VERSION}"
 # Clone repository
 git clone https://github.com/nickheyer/discopanel.git /opt/"${APPLICATION}"
-msg_ok "Cloning Repository"
+msg_ok "Installed DiscoPanel ${DISCOPANEL_LATEST_VERSION}"
 
 msg_info "Building DiscoPanel frontend Application"
 # Build frontend
 cd /opt/"${APPLICATION}"/web/discopanel || exit
 npm install
 npm run build
-msg_ok "Building DiscoPanel frontend Application"
+msg_ok "Builded DiscoPanel frontend Application"
 
 msg_info "Building DiscoPanel backend Application"
 # Build backend
@@ -58,7 +58,7 @@ go build -o discopanel cmd/discopanel/main.go
 
 # Version tracking (optional)
 echo "$DISCOPANEL_LATEST_VERSION" >/opt/"${APPLICATION}"_version.txt
-msg_ok "Building DiscoPanel backend Application"
+msg_ok "Builded DiscoPanel backend Application"
 
 # Creating Service
 msg_info "Creating Service"
