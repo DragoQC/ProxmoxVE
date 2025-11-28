@@ -10,14 +10,57 @@
 > [!CAUTION]
 Exercise vigilance regarding copycat or coat-tailing sites that seek to exploit the project's popularity for potentially malicious purposes.
 
+## 2025-11-28
+
+### 🚀 Updated Scripts
+
+  - #### 🐞 Bug Fixes
+
+    - Apache-guacamole: fixed to early rm [@mtorazzi](https://github.com/mtorazzi) ([#9492](https://github.com/community-scripts/ProxmoxVE/pull/9492))
+
+  - #### 💥 Breaking Changes
+
+    - Remove: Habitica [@MickLesk](https://github.com/MickLesk) ([#9489](https://github.com/community-scripts/ProxmoxVE/pull/9489))
+
+## 2025-11-27
+
+### 🆕 New Scripts
+
+  - Qdrant ([#9465](https://github.com/community-scripts/ProxmoxVE/pull/9465))
+
+### 🚀 Updated Scripts
+
+  - #### 💥 Breaking Changes
+
+    - Upgrade pve-scripts-local to node 24 [@michelroegl-brunner](https://github.com/michelroegl-brunner) ([#9457](https://github.com/community-scripts/ProxmoxVE/pull/9457))
+
+### 🌐 Website
+
+  - #### 🐞 Bug Fixes
+
+    - PBS: fix typo [@joshuaharmsen845](https://github.com/joshuaharmsen845) ([#9482](https://github.com/community-scripts/ProxmoxVE/pull/9482))
+
+## 2025-11-26
+
+### 🚀 Updated Scripts
+
+  - Joplin Server: Increase RAM for LXC [@tremor021](https://github.com/tremor021) ([#9460](https://github.com/community-scripts/ProxmoxVE/pull/9460))
+
+  - #### 🐞 Bug Fixes
+
+    - Fix Open WebUI update logic (swap upgrade/install) [@camcop](https://github.com/camcop) ([#9461](https://github.com/community-scripts/ProxmoxVE/pull/9461))
+
 ## 2025-11-25
 
 ### 🚀 Updated Scripts
 
-  - Fix the mikrotik VM installer after they reformatted their downloads page [@paul-ridgway](https://github.com/paul-ridgway) ([#9434](https://github.com/community-scripts/ProxmoxVE/pull/9434))
-
   - #### 🐞 Bug Fixes
 
+    - Open WebUI: Change install command to upgrade for Open-WebUI [@tremor021](https://github.com/tremor021) ([#9448](https://github.com/community-scripts/ProxmoxVE/pull/9448))
+    - core: set default LANG in locale configuration [@MickLesk](https://github.com/MickLesk) ([#9440](https://github.com/community-scripts/ProxmoxVE/pull/9440))
+    - documenso: switch to npm peer-.deps to get build running [@MickLesk](https://github.com/MickLesk) ([#9441](https://github.com/community-scripts/ProxmoxVE/pull/9441))
+    - Refactor Asterisk installation process [@MickLesk](https://github.com/MickLesk) ([#9429](https://github.com/community-scripts/ProxmoxVE/pull/9429))
+    - Fix the mikrotik VM installer after they reformatted their downloads page [@paul-ridgway](https://github.com/paul-ridgway) ([#9434](https://github.com/community-scripts/ProxmoxVE/pull/9434))
     - paperless: patch consume to uv [@MickLesk](https://github.com/MickLesk) ([#9425](https://github.com/community-scripts/ProxmoxVE/pull/9425))
 
   - #### ✨ New Features
@@ -26,7 +69,7 @@ Exercise vigilance regarding copycat or coat-tailing sites that seek to exploit 
 
 ### 🧰 Maintenance
 
-  - #### 📝 Documentation
+  - #### 📂 Github
 
     - gh: update supported PVE Version [@MickLesk](https://github.com/MickLesk) ([#9422](https://github.com/community-scripts/ProxmoxVE/pull/9422))
 
