@@ -1,65 +1,78 @@
 #!/usr/bin/env bash
-
+source <(curl -fsSL https://raw.githubusercontent.com/DragoQC/ProxmoxVE/main/misc/build.func)
 # Copyright (c) 2021-2025 community-scripts ORG
 # Author: DragoQC
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://discopanel.app/
 
-# Import Functions und Setup
-source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+APP="DiscoPanel"
+var_tags="${var_tags:-gaming}"
+var_cpu="${var_cpu:-4}"
+var_ram="${var_ram:-4096}"
+var_disk="${var_disk:-15}"
+var_os="${var_os:-debian}"
+var_version="${var_version:-13}"
+var_unprivileged="${var_unprivileged:-1}"
+
+header_info "$APP"
+variables
 color
-verb_ip6
 catch_errors
-setting_up_container
-network_check
-update_os
 
-msg_info "Installing Docker"
-DOCKER_CONFIG_PATH='/etc/docker/daemon.json'
-mkdir -p $(dirname $DOCKER_CONFIG_PATH)
-echo -e '{\n  "log-driver": "journald"\n}' >/etc/docker/daemon.json
-$STD sh <(curl -fsSL https://get.docker.com)
-msg_ok "Installed Docker"
+function update_script() {
+  header_info
+  check_container_storage
+  check_container_resources
 
+  if [[ ! -d "/opt/discopanel" ]]; then
+    msg_error "No ${APP} Installation Found!"
+    exit
+  fi
 
-msg_info "Installing DiscoPanel"
-fetch_and_deploy_gh_release "discopanel" "nickheyer/discopanel" "tarball" "latest" "/opt/discopanel"
-msg_ok "Installed DiscoPanel"
+  if check_for_gh_release "discopanel" "nickheyer/discopanel"; then
+    msg_info "Stopping Service"
+    systemctl stop discopanel
+    msg_ok "Stopped Service"
 
-setup_nodejs
+    msg_info "Creating Backup"
+    mkdir -p /opt/discopanel_backup_last
+    cp -r /opt/discopanel/data/discopanel.db \
+      /opt/discopanel/data/.recovery_key \
+      /opt/discopanel/data/servers \
+      /opt/discopanel_backup_last/
+    msg_ok "Created Backup"
 
-msg_info "Building DiscoPanel frontend"
-cd /opt/discopanel/web/discopanel || exit
-$STD npm install
-$STD npm run build
-msg_ok "Built DiscoPanel frontend"
+    rm -rf /opt/discopanel
 
-setup_go
+    CLEAN_INSTALL= 1 fetch_and_deploy_gh_release "discopanel" "nickheyer/discopanel" "tarball" "latest" "/opt/discopanel"
+    msg_info "Building frontend"
+    cd /opt/discopanel/web/discopanel || exit
+    npm install
+    npm run build
+    msg_ok "Builded frontend"
 
-msg_info "Building DiscoPanel backend"
-cd /opt/discopanel || exit
-$STD go build -o discopanel cmd/discopanel/main.go
-msg_ok "Built DiscoPanel backend"
+    msg_info "Building backend"
+    cd /opt/discopanel || exit
+    go build -o discopanel cmd/discopanel/main.go
+    msg_ok "Builded backend"
 
-msg_info "Creating Service"
-cat <<EOF >/etc/systemd/system/discopanel.service
-[Unit]
-Description=DiscoPanel Service
-After=network.target
+    msg_info "Restoring Data"
+    cp -r /opt/discopanel_backup_last/* /opt/discopanel/data/
+    msg_ok "Restored Data"
 
-[Service]
-WorkingDirectory=/opt/discopanel
-ExecStart=/opt/discopanel/discopanel
-Restart=always
-User=root
+    msg_info "Starting Service"
+    systemctl start discopanel
+    msg_ok "Started Service"
+    msg_ok "Updated Successfully!"
+  fi
+  exit
+}
 
-[Install]
-WantedBy=multi-user.target
-EOF
+start
+build_container
+description
 
-systemctl enable -q --now "discopanel"
-msg_ok "Created Service"
-
-motd_ssh
-customize
-cleanup_lxc
+msg_ok "Completed Successfully!\n"
+echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
+echo -e "${INFO}${YW} Access it using the following URL:${CL}"
+echo -e "${TAB}${GATEWAY}${BGN}http://${IP}:8080${CL}"
